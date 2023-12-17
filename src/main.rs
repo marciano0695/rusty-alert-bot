@@ -23,6 +23,7 @@ impl EventHandler for Bot {
 
             let content = match command.data.name.as_str() {
                 "ping" => Some(commands::ping::run(&command.data.options())),
+                "alert" => Some(commands::alert::run(&command.data.options())),
                 _ => Some("not implemented :(".to_string()),
             };
 
@@ -56,8 +57,12 @@ impl EventHandler for Bot {
         // Set discord server id, convert string to u64
         let guild_id = GuildId::new(discord_server_id.parse::<u64>().unwrap());
 
+        // Register all commands from folder commands
         let commands = guild_id
-            .set_commands(&ctx.http, vec![commands::ping::register()])
+            .set_commands(
+                &ctx.http,
+                vec![commands::ping::register(), commands::alert::register()],
+            )
             .await;
 
         println!("I now have the following guild slash commands: {commands:#?}");
