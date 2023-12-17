@@ -1,5 +1,7 @@
 mod commands;
 
+use std::env;
+
 use anyhow::anyhow;
 use serenity::async_trait;
 use serenity::builder::{CreateInteractionResponse, CreateInteractionResponseMessage};
@@ -45,7 +47,14 @@ impl EventHandler for Bot {
     async fn ready(&self, ctx: Context, ready: Ready) {
         info!("{} is connected!", ready.user.name);
 
-        let guild_id = GuildId::new(1185630639597293680);
+        // Get string value from env
+        let discord_server_id = match env::var("DISCORD_SERVER_ID") {
+            Ok(val) => val,
+            Err(e) => panic!("could not find {}: {}", "DISCORD_SERVER_ID", e),
+        };
+
+        // Set discord server id, convert string to u64
+        let guild_id = GuildId::new(discord_server_id.parse::<u64>().unwrap());
 
         let commands = guild_id
             .set_commands(&ctx.http, vec![commands::ping::register()])
@@ -65,6 +74,14 @@ async fn serenity(
     } else {
         return Err(anyhow!("'DISCORD_TOKEN' was not found").into());
     };
+
+    let discord_server_id = if let Some(id) = secret_store.get("DISCORD_SERVER_ID") {
+        id
+    } else {
+        return Err(anyhow!("'DISCORD_SERVER_ID' was not found").into());
+    };
+
+    env::set_var("DISCORD_SERVER_ID", discord_server_id);
 
     // Set gateway intents, which decides what events the bot will be notified about
     let intents = GatewayIntents::GUILD_MESSAGES | GatewayIntents::MESSAGE_CONTENT;
