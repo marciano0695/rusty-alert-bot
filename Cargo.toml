@@ -12,3 +12,6 @@ shuttle-secrets = "0.35.1"
 tokio = "1.26.0"
 tracing = "0.1.37"
 reqwest = { version = "0.11.22", features = ["blocking", "json"] }
+serde_json = "1.0.108"
+schedule = "0.1.0"
+chrono = "0.4.31"
